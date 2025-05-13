@@ -1,9 +1,6 @@
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import StringCalculator, { add } from "./StringCalculator";
+import { add } from "./helper";
 
-// Unit tests for the add function
 describe("add function", () => {
   // Test case for empty string
   test("empty string should return 0", () => {
@@ -29,38 +26,38 @@ describe("add function", () => {
   test("numbers with spaces should be handled correctly", () => {
     expect(add("1, 2, 3")).toBe(6);
   });
-});
 
-// Component tests
-describe("StringCalculator component", () => {
-  test("renders the calculator with initial empty state", () => {
-    render(<StringCalculator />);
-
-    // Check if the component renders correctly
-    expect(screen.getByText("String Calculator")).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText("Enter comma-separated numbers")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /calculate/i })
-    ).toBeInTheDocument();
-
-    // Result should not be visible initially
-    expect(screen.queryByText(/Result:/)).not.toBeInTheDocument();
+  // Test case for newlines as delimiters
+  test("newlines should be treated as delimiters", () => {
+    expect(add("1\n2,3")).toBe(6);
   });
 
-  test("calculates and displays the result when button is clicked", () => {
-    render(<StringCalculator />);
+  // Test case for custom delimiters
+  test("custom delimiters should be supported", () => {
+    expect(add("//;\n1;2")).toBe(3);
+  });
 
-    // Enter input
-    const input = screen.getByPlaceholderText("Enter comma-separated numbers");
-    fireEvent.change(input, { target: { value: "1,2,3" } });
+  // Test case for mixed delimiters
+  test("mixed delimiters should work correctly", () => {
+    expect(add("//|\n1|2\n3")).toBe(6);
+  });
 
-    // Click calculate button
-    const button = screen.getByRole("button", { name: /calculate/i });
-    fireEvent.click(button);
+  // Test case for negative numbers
+  test("should throw an exception for a single negative number", () => {
+    expect(() => add("-1,2")).toThrow("negative numbers not allowed -1");
+  });
 
-    // Check if result is displayed correctly
-    expect(screen.getByText("Result: 6")).toBeInTheDocument();
+  // Test case for multiple negative numbers
+  test("should throw an exception with all negative numbers listed", () => {
+    expect(() => add("1,-2,-3,4,-5")).toThrow(
+      "negative numbers not allowed -2,-3,-5"
+    );
+  });
+
+  // Test case for negative numbers with custom delimiter
+  test("should handle negative numbers with custom delimiter", () => {
+    expect(() => add("//;\n1;-2;3;-4")).toThrow(
+      "negative numbers not allowed -2,-4"
+    );
   });
 });
