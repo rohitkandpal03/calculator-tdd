@@ -60,4 +60,25 @@ describe("add function", () => {
       "negative numbers not allowed -2,-4"
     );
   });
+
+  // Test case for numbers greater than 1000
+  test("should ignore numbers greater than 1000", () => {
+    expect(add("2,1001")).toBe(2);
+    expect(add("2,1001,3")).toBe(5);
+  });
+
+  // Test case for delimiters of any length
+  test("should support delimiters of any length", () => {
+    expect(add("//[***]\n1***2***3")).toBe(6);
+  });
+
+  // Test case for multiple delimiters
+  test("should support multiple delimiters", () => {
+    expect(add("//[*][%]\n1*2%3")).toBe(6);
+  });
+
+  // Test case for multiple delimiters with varying lengths
+  test("should support multiple delimiters with varying lengths", () => {
+    expect(add("//[**][%%%]\n1**2%%%3")).toBe(6);
+  });
 });
