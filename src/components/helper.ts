@@ -9,14 +9,41 @@ export const add = (numbers: string): number => {
     .replace(/\\\\/g, "\\");
 
   if (numbers.startsWith("//")) {
-    const delimiterEndIndex = numbersString.indexOf("\n");
+    const newLineIndex = numbersString.indexOf("\n");
+    if (newLineIndex !== -1) {
+      const header = numbersString.substring(0, newLineIndex); // Full line e.g. "//[***]" or "//;"
+      const potentialNumbers = numbersString.substring(newLineIndex + 1);
 
-    if (delimiterEndIndex !== -1) {
-      delimiter = numbersString.substring(2, delimiterEndIndex);
-      numbersString = numbersString.substring(delimiterEndIndex + 1);
+      if (header.startsWith("//[") && header.endsWith("]")) {
+        const customDelimiter = header.substring(3, header.length - 1);
+        if (customDelimiter) {
+          // Delimiter must not be empty
+          delimiter = customDelimiter;
+          numbersString = potentialNumbers;
+        } else {
+          // Case: "//[]\n" - numbers start after \n, default delimiter.
+          numbersString = potentialNumbers;
+        }
+      } else if (header.startsWith("//") && header.length > 2) {
+        // Old format like "//;\n" or potentially "//***\n"
+        // Takes whatever is between "//" and "\n" as delimiter
+        const customDelimiter = header.substring(2);
+        if (customDelimiter) {
+          // Delimiter must not be empty
+          delimiter = customDelimiter;
+          numbersString = potentialNumbers;
+        } else {
+          // Case "//\n" where customDelimiter would be empty
+          numbersString = potentialNumbers;
+        }
+      } else if (header === "//") {
+        // Case "//\n" specifically (if not caught by previous branches)
+        numbersString = potentialNumbers;
+      }
+      // If numbers.startsWith("//") but no newline, or invalid format, numbersString is not changed here by delimiter logic,
+      // and default delimiter is used.
     }
   }
-  console.log("delimiter ", { delimiter, numbersString });
   numbersString = numbersString.replace(/\n/g, delimiter);
 
   const numbersArray = numbersString
@@ -31,5 +58,7 @@ export const add = (numbers: string): number => {
     );
   }
 
-  return numbersArray.reduce((sum, num) => sum + num, 0);
+  return numbersArray
+    .filter((num) => num <= 1000)
+    .reduce((sum, num) => sum + num, 0);
 };
