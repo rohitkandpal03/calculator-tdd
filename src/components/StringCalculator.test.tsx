@@ -71,4 +71,14 @@ describe("add function", () => {
   test("should support delimiters of any length", () => {
     expect(add("//[***]\n1***2***3")).toBe(6);
   });
+
+  // Test case for multiple delimiters
+  test("should support multiple delimiters", () => {
+    expect(add("//[*][%]\n1*2%3")).toBe(6);
+  });
+
+  // Test case for multiple delimiters with varying lengths
+  test("should support multiple delimiters with varying lengths", () => {
+    expect(add("//[**][%%%]\n1**2%%%3")).toBe(6);
+  });
 });
